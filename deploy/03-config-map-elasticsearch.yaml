@@ -4,13 +4,18 @@ metadata:
   name: elasticsearch-server-conf
   labels:
     name: elasticsearch-server-conf
-  namespace: monitoring
+  namespace: logging
 data:
   elasticsearch.yml: |-
     filebeat.inputs:
-    - type: container
+    - type: filestream
+      id: system-log-id
       paths:
-        - /var/log/containers/*.log
+        - /var/log/*
+    - type: filestream
+      id: kubernetes-log-id
+      paths:
+        - /var/log/kubernetes/*.log
     output.elasticsearch:
       hosts: ["http://elasticsearch:9200"]
       username: "elastic"

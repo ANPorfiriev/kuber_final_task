@@ -1,39 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: elasticsearch-deployment
-  namespace: monitoring
+  name: kibana-deployment
+  namespace: logging
   labels:
-    app: elasticsearch
+    app: kibana
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: elasticsearch
+      app: kibana
   template:
     metadata:
       labels:
-        app: elasticsearch
+        app: kibana
     spec:
       containers:
-        - name: elasticsearch
-          image: elasticsearch:7.17.24
-          env:
-          - name: discovery.type
-            value: single-node
-          - name: ELASTIC_PASSWORD
-            value: "1"
+        - name: kibana
+          image: kibana:7.17.24
           ports:
             - containerPort: 9200
           volumeMounts:
-            - name: elasticsearch-config-volume
-              mountPath: /etc/elasticsearch/
-            - name: elasticsearch-storage-volume
-              mountPath: /usr/share/elasticsearch/data
+            - name: kibana-config-volume
+              mountPath: /usr/share/kibana/config/
+            - name: kibana-storage-volume
+              mountPath: /usr/share/kibana/data
+
       volumes:
-        - name: elasticsearch-config-volume
+        - name: kibana-config-volume
           configMap:
             defaultMode: 420
-            name: elasticsearch-server-conf
-        - name: elasticsearch-storage-volume
-          emptyDir: {}
+            name: kibana-server-conf
+        - name: kibana-storage-volume
+          persistentVolumeClaim:
+            claimName: elk-pvc

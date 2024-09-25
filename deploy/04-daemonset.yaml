@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: elasticsearch-ds
+  namespace: logging
+  labels:
+    app: elasticsearch
+    type: ds
+spec:
+  selector:
+    matchLabels:
+      app: elasticsearch
+      type: ds
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+        type: ds
+    spec:
+      containers:
+        - name: elasticsearch
+          image: elasticsearch:7.17.24
+          ports:
+            - containerPort: 9200
+          volumeMounts:
+            - name: elasticsearch-config-volume
+              mountPath: /etc/elasticsearch/
+            - name: elasticsearch-storage-volume
+              mountPath: /usr/share/elasticsearch/data
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists   
+      - effect: DiskPressure
+        operator: Exists
+      volumes:
+        - name: elasticsearch-config-volume
+          configMap:
+            defaultMode: 420
+            name: elasticsearch-server-conf
+        - name: elasticsearch-storage-volume
+          persistentVolumeClaim:
+            claimName: elk-pvc
